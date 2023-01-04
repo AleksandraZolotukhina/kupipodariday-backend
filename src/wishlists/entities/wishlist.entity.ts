@@ -6,6 +6,8 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinTable,
+  ManyToMany,
 } from 'typeorm';
 
 import { Length, IsDate, IsFQDN } from 'class-validator';
@@ -29,7 +31,9 @@ export class Wishlist {
   @Length(1, 250)
   name: string;
 
-  @Column()
+  @Column({
+    default: '',
+  })
   @Length(0, 1500)
   description: string;
 
@@ -37,9 +41,10 @@ export class Wishlist {
   @IsFQDN()
   image: string;
 
-  @OneToMany(() => Wish, (wish) => wish.id)
+  @ManyToMany(() => Wish)
+  @JoinTable()
   items: Wish[];
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.wishlists)
   owner: User;
 }

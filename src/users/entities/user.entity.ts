@@ -54,11 +54,13 @@ export class User {
   @IsNotEmpty()
   email: string;
 
-  @Column()
+  @Column({
+    select: false,
+  })
   @IsNotEmpty()
   password: string;
 
-  @OneToMany(() => Wish, (wish) => wish.id)
+  @OneToMany(() => Wish, (wish) => wish.owner)
   wishes: Wish[];
 
   @OneToMany(() => Offer, (offer) => offer.id)

@@ -36,16 +36,21 @@ export class Wish {
   image: string;
 
   @Column({
-    type: 'float',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
   })
   price: number;
 
   @Column({
-    type: 'float',
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    default: 0,
   })
   raised: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.wishes)
   owner: User;
 
   @Column()
@@ -55,7 +60,9 @@ export class Wish {
   @ManyToOne(() => Offer, (offer) => offer.id)
   offers: Offer[];
 
-  @Column()
+  @Column({
+    default: 0,
+  })
   @IsInt()
   @IsPositive()
   copied: number;

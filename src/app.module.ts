@@ -9,9 +9,12 @@ import { User } from './users/entities/user.entity';
 import { Wishlist } from './wishlists/entities/wishlist.entity';
 import { Wish } from './wishes/entities/wish.entity';
 import { Offer } from './offers/entities/offer.entity';
-
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import configuration from '../config';
 @Module({
   imports: [
+    ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -26,6 +29,7 @@ import { Offer } from './offers/entities/offer.entity';
     WishesModule,
     WishlistsModule,
     OffersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [],
