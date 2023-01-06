@@ -17,15 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log('here3');
-    console.log(payload);
     const user = await this.usersService.findOne({
       where: { id: payload.sub },
     });
     if (!user) {
       throw new UnauthorizedException();
     }
-    console.log(user);
     return user;
   }
 }

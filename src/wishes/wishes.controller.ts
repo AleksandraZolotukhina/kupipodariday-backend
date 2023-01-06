@@ -47,7 +47,6 @@ export class WishesController {
     @Param('id') id: string,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    console.log('update wish');
     return this.wishesService.update(req.user.id, +id, updateWishDto);
   }
 

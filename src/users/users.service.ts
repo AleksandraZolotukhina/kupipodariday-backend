@@ -56,15 +56,17 @@ export class UsersService {
     throw new NotFoundException('Пользователя c таким username не существует');
   }
 
-  async findByEmail(userEmail: string) {
-    const { id, username, about, avatar, email, createdAt, updatedAt } =
-      await this.findOne({ where: { email: userEmail } });
-
-    return { id, username, about, avatar, email, createdAt, updatedAt };
+  async findByQuery(query: string) {
+    const user = await this.usersRepository.find({
+      where: [{ email: query }, { username: query }],
+    });
+    if (user) {
+      return user;
+    }
+    throw new NotFoundException('Такого пользователя не существует');
   }
 
   findOne(query) {
-    console.log('my findOne');
     return this.usersRepository.findOne(query);
   }
 
@@ -81,31 +83,28 @@ export class UsersService {
     if (isHasUser) {
       throw new ConflictException('Такой пользователь уже существует');
     }
-
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
     await this.usersRepository.update(id, updateUserDto);
-    const newUser = await this.findOne({ where: { id } });
-    const { password, ...result } = newUser;
-    return result;
+    return await this.usersRepository.findOne({ where: { id } });
   }
 
   async getMyWishes(userId: number) {
-    const wishes = await this.usersRepository.find({
+    const wishes = await this.usersRepository.findOne({
       where: { id: userId },
       relations: ['wishes'],
     });
-    return wishes[0].wishes;
+    return wishes.wishes;
   }
 
   async getUserWishes(username: string) {
     const user = await this.findByUsername(username);
-    const wishes = await this.usersRepository.find({
+    const wishes = await this.usersRepository.findOne({
       where: { id: user.id },
       relations: ['wishes'],
     });
 
-    return wishes[0].wishes;
+    return wishes.wishes;
   }
 }

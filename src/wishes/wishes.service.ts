@@ -8,6 +8,7 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class WishesService {
@@ -16,7 +17,7 @@ export class WishesService {
     private readonly wishRepository: Repository<Wish>,
   ) {}
 
-  async create(user, createWishDto: CreateWishDto) {
+  async create(user: User, createWishDto: CreateWishDto) {
     return await this.wishRepository.save({
       ...createWishDto,
       owner: user,
@@ -38,7 +39,7 @@ export class WishesService {
   async findById(id: number) {
     const wish = await this.wishRepository.findOne({
       where: { id: id },
-      relations: ['owner'],
+      relations: ['owner', 'offers'],
     });
 
     if (wish) {
@@ -53,6 +54,13 @@ export class WishesService {
     if (userId !== wish.owner.id) {
       throw new ForbiddenException('Нельзя изменять чужие подарки');
     }
+
+    if (+wish.raised > 0 && +wish.price !== +updateWishDto.price) {
+      throw new ForbiddenException(
+        'Нельзя изменять стоимость подарка, если уже есть желающие скинуться',
+      );
+    }
+
     await this.wishRepository.update(wishId, updateWishDto);
     const updateWish = await this.findById(wishId);
     return updateWish;
@@ -67,7 +75,7 @@ export class WishesService {
     return wish;
   }
 
-  async copy(user, wishId: number) {
+  async copy(user: User, wishId: number) {
     const wish = await this.findById(wishId);
     await this.wishRepository.update(wishId, { copied: ++wish.copied });
     delete wish.id;

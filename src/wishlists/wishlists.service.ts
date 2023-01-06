@@ -9,6 +9,7 @@ import { In, Repository } from 'typeorm';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { Wishlist } from './entities/wishlist.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class WishlistsService {
@@ -18,7 +19,7 @@ export class WishlistsService {
     private readonly wishService: WishesService,
   ) {}
 
-  async create(user, createWishlistDto: CreateWishlistDto) {
+  async create(user: User, createWishlistDto: CreateWishlistDto) {
     const wishes = await this.wishService.find({
       where: { id: In(createWishlistDto.itemsId) },
     });
@@ -31,34 +32,31 @@ export class WishlistsService {
     return rest;
   }
 
-  //check
   async findAll() {
     return await this.wishlistRepository.find({
       relations: ['owner', 'items'],
     });
   }
 
-  //check
   async findById(id: number) {
-    const wishlist = await this.wishlistRepository.find({
+    const wishlist = await this.wishlistRepository.findOne({
       relations: ['owner', 'items'],
       where: { id: id },
     });
 
-    if (wishlist.length !== 0) {
+    if (wishlist) {
       return wishlist;
     }
     throw new NotFoundException('Списка желаний c таким id не существует');
   }
 
-  //check
   async update(
     userId: number,
     wishlistId: number,
     updateWishlistDto: UpdateWishlistDto,
   ) {
     const wishlist = await this.findById(wishlistId);
-    if (userId !== wishlist[0].owner.id) {
+    if (userId !== wishlist.owner.id) {
       throw new ForbiddenException(
         'Редактировать можно только свои подборки подарков',
       );
@@ -66,10 +64,9 @@ export class WishlistsService {
     return this.wishlistRepository.update(wishlistId, updateWishlistDto);
   }
 
-  //check
   async remove(userId: number, wishlistId: number) {
     const wishlist = await this.findById(wishlistId);
-    if (userId !== wishlist[0].owner.id) {
+    if (userId !== wishlist.owner.id) {
       throw new ForbiddenException(
         'Удалять можно только свои подборки подарков',
       );

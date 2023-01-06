@@ -17,7 +17,10 @@ export class OffersService {
   ) {}
 
   async create(user, createOfferDto: CreateOfferDto) {
-    const wish = await this.wishService.findById(createOfferDto.itemId);
+    const wish = await this.wishRepository.findOne({
+      where: { id: createOfferDto.itemId },
+      relations: ['owner'],
+    });
     if (user.id === wish.owner.id) {
       throw new ForbiddenException(
         'Нельзя вносить деньги на собственные подарки',
@@ -56,7 +59,7 @@ export class OffersService {
   }
 
   async findById(id: number) {
-    const offer = await this.offerRepository.find({
+    const offer = await this.offerRepository.findOne({
       where: { id: id },
       relations: ['user', 'item'],
     });

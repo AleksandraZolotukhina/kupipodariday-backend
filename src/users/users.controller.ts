@@ -4,14 +4,12 @@ import {
   Body,
   Patch,
   Param,
-  Query,
   Request,
   UseGuards,
   Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { FindByEmail } from './dto/find-by-email.dto';
 import { JwtGuard } from 'src/auth/jwt.guard';
 
 @UseGuards(JwtGuard)
@@ -29,15 +27,14 @@ export class UsersController {
     return this.usersService.update(+req.user.id, updateUserDto);
   }
 
-  //correct
   @Post('find')
-  findByEmail(@Query() query: FindByEmail) {
-    return this.usersService.findByEmail(query.email);
+  findByQuery(@Body() query: { query: string }) {
+    return this.usersService.findByQuery(query.query);
   }
 
   @Get(':username')
   findByUsername(@Param('username') username: string) {
-    return this.usersService.findOne({ where: { username: username } });
+    return this.usersService.findByUsername(username);
   }
 
   @Get('me/wishes')

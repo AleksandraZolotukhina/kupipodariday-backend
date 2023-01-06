@@ -3,6 +3,7 @@ import { Injectable, UseGuards } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LocalAuthGuard } from './local-auth.guard';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +13,6 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string) {
-    console.log('here2');
     const userInformation = await this.usersService.getUserWithPassword(
       username,
     );
@@ -21,18 +21,16 @@ export class AuthService {
 
     if (userInformation && isMatch) {
       const { password, ...result } = userInformation;
-      console.log('result: ', result);
       return result;
     }
     return null;
   }
 
   @UseGuards(LocalAuthGuard)
-  async signin(user: any) {
-    console.log(user.id);
+  async signin(user: User) {
     const payload = { username: user.username, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn: '24h' }),
     };
   }
 }

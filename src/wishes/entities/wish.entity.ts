@@ -5,6 +5,7 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { Length, IsDate, IsFQDN, IsInt, IsPositive } from 'class-validator';
@@ -57,7 +58,7 @@ export class Wish {
   @Length(1, 1024)
   description: string;
 
-  @ManyToOne(() => Offer, (offer) => offer.id)
+  @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
 
   @Column({
