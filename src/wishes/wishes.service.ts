@@ -33,7 +33,7 @@ export class WishesService {
   }
 
   getTopWishes() {
-    return this.wishRepository.find({ order: { createdAt: 'DESC' }, take: 10 });
+    return this.wishRepository.find({ order: { copied: 'DESC' }, take: 10 });
   }
 
   async findById(id: number) {
@@ -77,6 +77,20 @@ export class WishesService {
 
   async copy(user: User, wishId: number) {
     const wish = await this.findById(wishId);
+    const hasCopy = !!(await this.wishRepository.findOne({
+      where: {
+        name: wish.name,
+        link: wish.link,
+        price: wish.price,
+        owner: { id: user.id },
+      },
+      relations: { owner: true },
+    }));
+
+    if (hasCopy) {
+      throw new ForbiddenException('Вы уже копировали себе этот подарок');
+    }
+
     await this.wishRepository.update(wishId, { copied: ++wish.copied });
     delete wish.id;
     delete wish.createdAt;

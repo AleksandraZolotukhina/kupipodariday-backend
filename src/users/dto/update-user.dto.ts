@@ -10,6 +10,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @NotEquals('')
+  @Length(2, 30)
   username: string;
 
   @IsOptional()
